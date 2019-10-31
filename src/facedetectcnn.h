@@ -38,8 +38,10 @@ the use of this software, even if advised of the possibility of such damage.
 
 #pragma once
 
-#define _ENABLE_AVX2 //Please enable it if X64 CPU
+//#define _ENABLE_AVX2 //Please enable it if X64 CPU
 //#define _ENABLE_NEON //Please enable it if ARM CPU
+
+#include <typeinfo>
 
 
 int * facedetect_cnn(unsigned char * result_buffer, //buffer memory for storing face detection results, !!its size must be 0x20000 Bytes!!
