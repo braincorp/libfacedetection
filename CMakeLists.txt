@@ -4,6 +4,7 @@ project(libfacedetection)
 
 cmake_minimum_required(VERSION 2.8)
 
+option(FACE_DETECTION_INSTALL "Install face detection library" OFF)
 option(ENABLE_NEON "whether use neon, if use arm please set it on" OFF)
 option(ENABLE_AVX512 "use avx512" OFF)
 option(ENABLE_AVX2 "use avx2" ON)
@@ -130,26 +131,28 @@ set_target_properties(${fdt_lib_name} PROPERTIES
    )
 
 # Install target
-INSTALL(TARGETS ${fdt_lib_name}
-    EXPORT ${fdt_lib_name}Config
-    RUNTIME DESTINATION "${CMAKE_INSTALL_BINDIR}"
-    LIBRARY DESTINATION "${CMAKE_INSTALL_LIBDIR}"
-    ARCHIVE DESTINATION "${CMAKE_INSTALL_LIBDIR}"
-    PUBLIC_HEADER DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/facedetection
-    INCLUDES DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
-    )
-export(TARGETS ${fdt_lib_name}
-       APPEND FILE ${CMAKE_BINARY_DIR}/${fdt_lib_name}Config.cmake
-)
-# Install cmake configure files
-install(EXPORT ${fdt_lib_name}Config
-        DESTINATION "${CMAKE_INSTALL_LIBDIR}/cmake/${fdt_lib_name}"
+if (FACE_DETECTION_INSTALL)
+    INSTALL(TARGETS ${fdt_lib_name}
+        EXPORT ${fdt_lib_name}Config
+        RUNTIME DESTINATION "${CMAKE_INSTALL_BINDIR}"
+        ARCHIVE DESTINATION "${CMAKE_INSTALL_LIBDIR}"
+        LIBRARY DESTINATION "${CMAKE_INSTALL_LIBDIR}"
+        PUBLIC_HEADER DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/facedetection
+        INCLUDES DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
         )
-write_basic_package_version_file(
-    "${CMAKE_BINARY_DIR}/${fdt_lib_name}ConfigVersion.cmake"
-    VERSION ${BUILD_VERSION}
-    COMPATIBILITY AnyNewerVersion)
-install(FILES "${CMAKE_BINARY_DIR}/${fdt_lib_name}ConfigVersion.cmake" DESTINATION "${CMAKE_INSTALL_LIBDIR}/cmake/${fdt_lib_name}")
+    export(TARGETS ${fdt_lib_name}
+           APPEND FILE ${CMAKE_BINARY_DIR}/${fdt_lib_name}Config.cmake
+    )
+    # Install cmake configure files
+    install(EXPORT ${fdt_lib_name}Config
+            DESTINATION "${CMAKE_INSTALL_LIBDIR}/cmake/${fdt_lib_name}"
+            )
+    write_basic_package_version_file(
+        "${CMAKE_BINARY_DIR}/${fdt_lib_name}ConfigVersion.cmake"
+        VERSION ${BUILD_VERSION}
+        COMPATIBILITY AnyNewerVersion)
+    install(FILES "${CMAKE_BINARY_DIR}/${fdt_lib_name}ConfigVersion.cmake" DESTINATION "${CMAKE_INSTALL_LIBDIR}/cmake/${fdt_lib_name}")
+endif()
 
 # Create demo. OpenCV is requred.
 if (DEMO)
