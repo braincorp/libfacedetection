@@ -85,42 +85,21 @@ void myFree_(void* ptr)
 inline int dotProductUint8Int8(unsigned char * p1, signed char * p2, int num)
 {
     int sum = 0;
-    
-#if defined(_ENABLE_NEON)
-    int8x8x2_t a, b;
-    int32x4_t mul_s32x4;
-    int32x4_t result_vec;
-    result_vec = vdupq_n_s32(0); //zeros
 
-    for (int i = 0; i < num; i += 16)
-    {
-        a = vld2_s8((signed char*)p1 + i);
-        b = vld2_s8(p2 + i);
-        mul_s32x4 = vpaddlq_s16(vaddq_s16(vmull_s8(a.val[0], b.val[0]), vmull_s8(a.val[1], b.val[1])));
-        result_vec = vaddq_s32(result_vec, mul_s32x4);     
-    }
-    sum += vgetq_lane_s32(result_vec, 0);
-    sum += vgetq_lane_s32(result_vec, 1);
-    sum += vgetq_lane_s32(result_vec, 2);
-    sum += vgetq_lane_s32(result_vec, 3);
-    /*
 #if defined(_ENABLE_NEON)
-    int8x16_t a, b;
-    int32x4_t result_vec;
-    result_vec = vdupq_n_s32(0); //zeros
+    // 4-element vector of zeros
+    int32x4_t partialSumsNeon = vdupq_n_s32(0);
+    for(short i = 0; i < num; i += 8) {
+        // Turn uint8_t into int16_t
+        int16x8_t a = vreinterpretq_s16_u16(vmovl_u8(vld1_u8(p1 + i)));
 
-    for (int i = 0; i < num; i += 16)
-    {
-        a = vld1q_s8((signed char*)p1 + i);
-        b = vld1q_s8(p2 + i);
-        result_vec = vdotq_s32(result_vec, a, b);
-       
+        // Turn int8_t into int16_t
+        int16x8_t b = vmovl_s8(vld1_s8(p2 + i));
+
+        partialSumsNeon = vmlal_s16(partialSumsNeon, vget_low_s16(a), vget_low_s16(b));
+        partialSumsNeon = vmlal_s16(partialSumsNeon, vget_high_s16(a), vget_high_s16(b));
     }
-    sum += vgetq_lane_s32(result_vec, 0);
-    sum += vgetq_lane_s32(result_vec, 1);
-    sum += vgetq_lane_s32(result_vec, 2);
-    sum += vgetq_lane_s32(result_vec, 3);
-*/
+    sum = vaddvq_s32 (partialSumsNeon);
 #elif defined(_ENABLE_AVX512)
     __m512i sum_int16x32;
     __m512i tmp_int32x16;
@@ -424,10 +403,7 @@ bool convolution_relu(CDataBlob<unsigned char> *inputData, const Filters* filter
     }
 #if defined(_ENABLE_NEON)
     {
-        int maxarray_int32x4[4];
-        vst1q_s32(maxarray_int32x4, max_int32x4);
-        for (int i = 0; i < 4; i++)
-            nMaxValue = MAX(maxarray_int32x4[i], nMaxValue);
+        nMaxValue = vmaxvq_s32(max_int32x4);
     }
 #elif defined(_ENABLE_AVX512)
     {

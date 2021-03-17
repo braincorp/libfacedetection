@@ -60,13 +60,8 @@ DO NOT EDIT the following code if you don't really understand it.
 
 #if defined(_ENABLE_NEON)
 #include "arm_neon.h"
-//NEON does not support UINT8*INT8 dot product
-//to conver the input data to range [0, 127],
-//and then use INT8*INT8 dot product
-#define _MAX_UINT8_VALUE 127
-#else
-#define _MAX_UINT8_VALUE 255
 #endif
+#define _MAX_UINT8_VALUE 255
 
 #if defined(_ENABLE_AVX512) 
 #define _MALLOC_ALIGN 512
@@ -304,28 +299,16 @@ public:
                         const unsigned char * pImgData = imgData + size_t(imgWidthStep) * srcy + imgChannels * srcx;
 
                         int output_channel_offset = ((fy + 1) * 3 + fx + 1) * 3; //3x3 filters, 3-channel image
-#if defined(_ENABLE_NEON)
-                        pData[output_channel_offset] = (pImgData[0] / 2);
-                        pData[output_channel_offset + 1] = (pImgData[1] / 2);
-                        pData[output_channel_offset + 2] = (pImgData[2] / 2);
-#else
                         pData[output_channel_offset] = (pImgData[0]);
                         pData[output_channel_offset+1] = (pImgData[1]);
                         pData[output_channel_offset+2] = (pImgData[2]);
-#endif
-
                     }
 
                 }
             }
         }
-#if defined(_ENABLE_NEON)
-        this->bias = 1; // 1/2 = 0
-        this->scale = 0.5f;
-#else
-        this->bias = 1; 
+        this->bias = 1;
         this->scale = 1.0f;
-#endif
         return true;
     }
     T getElement(int x, int y, int channel)
