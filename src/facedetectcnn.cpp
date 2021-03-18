@@ -461,8 +461,6 @@ bool maxpooling2x2S2(const CDataBlob<unsigned char> *inputData, CDataBlob<unsign
         return false;
     }
 
-    int lineElementStep = inputData->width * inputData->channelStep;
-
     outputData->create(outputW, outputH, outputC);
     outputData->scale = inputData->scale;
     outputData->bias = inputData->bias;
@@ -471,7 +469,7 @@ bool maxpooling2x2S2(const CDataBlob<unsigned char> *inputData, CDataBlob<unsign
     {
         for (int col = 0; col < outputData->width; col++)
         {
-            size_t inputMatOffsetsInElement[4];
+            size_t inputMatOffsetsInElement[4] = {0, 0, 0, 0};
             int elementCount = 0;
 
             int hstart = row * 2;
@@ -485,6 +483,7 @@ bool maxpooling2x2S2(const CDataBlob<unsigned char> *inputData, CDataBlob<unsign
                     inputMatOffsetsInElement[elementCount++] = (size_t(fy) *inputData->width + fx) * inputData->channelStep / sizeof(unsigned char);
                 }
 
+            if (outputData->data == NULL) continue;
             unsigned char * pOut = outputData->data + (size_t(row) * outputData->width + col) * outputData->channelStep / sizeof(unsigned char);
             unsigned char * pIn = inputData->data;
 
