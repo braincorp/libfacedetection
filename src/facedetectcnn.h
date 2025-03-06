@@ -415,4 +415,4 @@ bool detection_output(const CDataBlob<float> * priorbox,
                       int keep_top_k,
                       CDataBlob<float> * outputData);
 
-vector<FaceRect> objectdetect_cnn(unsigned char * rgbImageData, int with, int height, int step);
+std::vector<FaceRect> objectdetect_cnn(unsigned char * rgbImageData, int width, int height, int step, float confidence_threshold = 0.5f);

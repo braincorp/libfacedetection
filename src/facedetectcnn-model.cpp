@@ -99,7 +99,13 @@ void init_parameters()
     }
 }
 
-vector<FaceRect> objectdetect_cnn(unsigned char * rgbImageData, int width, int height, int step)
+std::vector<FaceRect> objectdetect_cnn(
+    unsigned char * rgbImageData,
+    int width,
+    int height,
+    int step,
+    float confidence_threshold
+)
 {
     CDataBlob<unsigned char> inputImage;
     CDataBlob<unsigned char> pConvDataBlobs[NUM_CONV_LAYER-8];
@@ -391,7 +397,7 @@ vector<FaceRect> objectdetect_cnn(unsigned char * rgbImageData, int width, int h
 
     CDataBlob<float> facesInfo;
     TIME_START;
-    detection_output(&mbox_priorbox, &mbox_loc_float, &mbox_conf_float, &mbox_iou_float, 0.3f, 0.5f, 1000, 100, &facesInfo);
+    detection_output(&mbox_priorbox, &mbox_loc_float, &mbox_conf_float, &mbox_iou_float, 0.3f, confidence_threshold, 1000, 100, &facesInfo);
     TIME_END("detection output")
 
 
